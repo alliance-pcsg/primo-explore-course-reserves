@@ -1,0 +1,25 @@
+{
+  "name": "primo-explore-course-reserves",
+  "version": "1.0.0",
+  "description": "a course reserves module for ex libris' primo-explore using the alma API.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alliance-PCJWG/primo-explore-course-reserves.git"
+  },
+  "keywords": [
+    "library",
+    "catalog",
+    "discovery",
+    "primo",
+    "primo-explore",
+    "alma",
+    "exlibris"
+  ],
+  "author": "Nick Budak <budak@lclark.edu>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Alliance-PCJWG/primo-explore-course-reserves/issues"
+  },
+  "homepage": "https://github.com/Alliance-PCJWG/primo-explore-course-reserves#readme"
+}
