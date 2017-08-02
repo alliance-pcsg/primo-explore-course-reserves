@@ -182,7 +182,7 @@ angular
          * Queries the Alma API to retrieve a list of courses based on a search filter.
          * Requires a server-side wrapper function defined in URLs.courses.
          * @param  {string} filter the search filter, e.g. 'searchableid~res'
-         * @return {array}         list of matching courses
+         * @return {promise}         list of matching courses
          */
         getCourses: function (filter) {
           return $http({
@@ -222,7 +222,7 @@ angular
          * Queries the Alma API to retrieve a course object using its cid.
          * Requires a server-side wrapper function defined in URLs.reserves.
          * @param  {string} cid course ID
-         * @return {object}     course object
+         * @return {promise}     course object
          */
         getCourse: function (cid) {
           return $http({
@@ -236,7 +236,7 @@ angular
          * Queries the Alma API to retrieve a bib using an item's MMSID.
          * Requires a server-side wrapper function defined in URLs.bibs.
          * @param  {string} mmsid item MMSID
-         * @return {object}       bib object
+         * @return {promise}       bib object
          */
         getBib: function (mmsid) {
           return $http({

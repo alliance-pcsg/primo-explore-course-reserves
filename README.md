@@ -1,5 +1,5 @@
 # primo-explore-course-reserves
-a course reserves module for ex libris' primo-explore using the alma API.
+a course reserves module for ex libris primo-explore using the alma API.
 
 ## installation
 
@@ -36,7 +36,7 @@ angular.module('courseReserves').config(
     $provide.constant('URLs', {
       courses: 'https://my.library.edu/getCourses.php?filter=',
       course: 'https://my.library.edu/getCourse.php?cid=',
-      bibs: 'https://my.library.edu/sgetBib.php?mmsid=',
+      bibs: 'https://my.library.edu/getBib.php?mmsid=',
       covers: 'https://syndetics.com/index.aspx?isbn=',
       fallback: 'https://na01.alma.exlibrisgroup.com/view/delivery/thumbnail/01ALLIANCE_MYLIB/'
     })
