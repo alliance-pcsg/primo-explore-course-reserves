@@ -53,15 +53,32 @@ This module requires substantial configuration.
 
 #### Course lists
 
-The `courseLists` constant holds an array of course list objects. The "filter" property of the object will be passed to the server-side to query the Alma API, as [described here](https://developers.exlibrisgroup.com/alma/apis/courses/GET/gwPcGly021pX8N42Hi9+i8Te26R66L4t/25ede018-da5d-4780-8fda-a8e5d103faba).
+The `courseLists` constant holds an array of course list objects. The "filter" property of the object will be passed to the server-side to query the Alma API, as [described here](https://developers.exlibrisgroup.com/alma/apis/courses/GET/gwPcGly021pX8N42Hi9+i8Te26R66L4t/25ede018-da5d-4780-8fda-a8e5d103faba). All properties except `sortType` are required and all are strings.
+
+| name       | usage                                                                                                                                    |
+|------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `group`    | arbitrary identifier used to link to the lists. /primo-explore/courses/`group` will be the URL to access all lists with this identifier. |
+| `title`    | a title for the course list.                                                                                                             |
+| `filter`   | filter used to send to server-side code to query alma API for courses. see link above for more info.                                     |
+| `sortType` | optional, one of "name" or "code". if present, will pre-sort course lists by selected sort type.                                         |
 
 #### URLs
 
-The `URLs` constant holds an object whose properties are links to web services used to retrieve course and bibliographic information. The values of `course`, `courses`, and `bibs` should all point to server-side scripts similar to those in the `php` folder.
+The `URLs` constant holds an object whose properties are links to web services used to retrieve course and bibliographic information. The values of `course`, `courses`, and `bibs` should all point to server-side scripts similar to those in the `php` folder. All properties are required strings.
+
+| name       | usage                                                                                                         |
+|------------|---------------------------------------------------------------------------------------------------------------|
+| `courses`  | server-side script to retrieve courses from Alma using a filter. see `php` folder for example implementation. |
+| `course`   | server-side script to retrieve course from Alma using its ID. see `php` folder for example implementation.    |
+| `bibs`     | server-side script to retrieve bib record from Alma using MMSID. see `php` folder for example implementation. |
+| `covers`   | an API to fetch book covers by ISBN. the provided example is free.                                            |
+| `fallback` | URL to an Alma instance to fetch a placeholder image if no ISBN is available.                                 |
 
 #### Loan Codes
 
-The `loanCodes` constant is an object that maps values from Alma (fulfillment configuration > fulfillment units > fulfillment unit locations tab) to user-readable strings associated with an item's loan type. For example, a fulfillment unit with code `wrs24h` might stand for "24-hour reserves". This information is extracted from the `AVA` field of an item's MARC record.
+The `loanCodes` constant is an object that maps values from Alma (fulfillment configuration > fulfillment units > fulfillment unit locations tab) to user-readable strings associated with an item's loan type. For example, a fulfillment unit with code `wrs24h` might stand for "24-hour reserves". This information is extracted from the `AVA` field of an item's MARC record. All properties are strings.
+
+
 
 ### Example
 
