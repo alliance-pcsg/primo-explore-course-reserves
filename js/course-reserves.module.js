@@ -29,9 +29,9 @@ angular
                                   <md-input-container flex>
                                       <label>Sort by:</label>
                                       <md-select ng-model="list.sortType">
-                                          <md-option ng-repeat="sortType in list.sortTypes" value="{{ sortType }}">
-                                              {{ sortType }}
-                                          </md-option>
+                                          <md-option value="code">course number</md-option>
+                                          <md-option value="name">course name</md-option>
+                                          <md-option value="instructors[0].last_name">instructor</md-option>
                                       </md-select>
                                   </md-input-container>
                               </md-card-title-text>
@@ -127,8 +127,7 @@ angular
           courses => {
             list.courses = courses
             list.departments = coursesService.getDepartments(courses)
-            list.sortTypes = ['code', 'name']
-            list.sortType = list.sortType || list.sortTypes[0]
+            list.sortType = list.sortType || 'code'
             list.courses.map(
               course => {
                 course.department = coursesService.getCourseDepartment(course)
