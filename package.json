@@ -1,6 +1,6 @@
 {
   "name": "primo-explore-course-reserves",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "a course reserves module for ex libris primo-explore using the alma API.",
   "main": "index.js",
   "repository": {
