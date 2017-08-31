@@ -14,7 +14,7 @@
 
 $almaBase = 'https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/' . $_GET['mmsid'] . '?';
 $queryParams = http_build_query(array(
-    'expand' => 'p_avail',
+    'expand' => 'p_avail,e_avail',
     'apikey' => 'YOUR_API_KEY_HERE'
 ));
 $ch = curl_init();

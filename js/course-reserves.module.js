@@ -131,7 +131,7 @@ angular
                       </md-card-title>
                       <md-card-content ng-if="reserves" class="animate-if">
                           <md-list flex>
-                              <md-list-item item="item" ng-repeat="item in reserves | orderBy : course.sortType" ng-href="{{ item.open_url }}" class="md-3-line" >
+                              <md-list-item item="item" ng-repeat="item in reserves | orderBy : course.sortType" ng-href="{{ item.link }}" class="md-3-line" >
                                   <img ng-src="{{ item.cover }}" class="md-avatar animate-if" />
                                   <div class="md-list-item-text" layout="column">
                                       <h3>{{ item.title }}</h3>
@@ -195,8 +195,10 @@ angular
               item.author = item.metadata.author || item.metadata.additional_person_name
               reservesService.getBib(item.metadata.mms_id).then(
                 bib => {
-                  item.availability = reservesService.getAvailability(bib)
-                  item.availabilityStyle = reservesService.getAvailabilityStyle(bib)
+                  item.title = item.title || bib.title
+                  item.link = reservesService.getLink(bib, item.type, $scope.vid)
+                  item.availability = reservesService.getAvailability(bib, item.type)
+                  item.availabilityStyle = reservesService.getAvailabilityStyle(bib, item.type)
                   item.loanType = reservesService.getLoanType(bib)
                   item.cover = reservesService.getCover(bib)
                 }
@@ -301,52 +303,75 @@ angular
         * Returns an array or false if field was not found.
         * Common fields:
         * ISBN (020)
+        * Notes (500)
         * @param  {object} bib       bib object returned from getBib()
         * @param  {string} fieldName name or number of the MARC field to find
         * @return {array}            values(s) of the field
         */
-        getMarcField: function(bib, fieldName) {
+        getMarcField: function (bib, fieldName) {
           let field = bib.record.datafield.find(field => field['@attributes'].tag === fieldName)
           return field ? this.makeArray(field.subfield) : false
         },
         /**
-        * Check if an item is available (not checked out) using a bib's AVA field.
+        * Get the availability of an item using a bib's AVA or AVE field.
+        * E-resources use AVE, while physical resources use AVA.
+        * Links to external resources will have type 'E_CR'.
         * @param  {object} bib       bib object returned from getBib()
+        * @param  {string} type      type of the item, e.g. 'BK' for books
         * @return {string}           'unavailable' or 'available'
         */
-        getAvailability: function(bib) {
-          let holdings = this.getMarcField(bib, 'AVA')
-          if (holdings) return holdings.filter(field => /(una|a)vailable/.test(field))[0]
-          return 'unavailable'
+        getAvailability: function (bib, type) {
+          if (type === 'E_CR') return 'link'
+          let physicalHoldings = this.getMarcField(bib, 'AVA')
+          let electronicHoldings = this.getMarcField(bib, 'AVE')
+          if (physicalHoldings) return physicalHoldings.filter(field => /(una|a)vailable/i.test(field))[0].toLowerCase()
+          else if (electronicHoldings) return electronicHoldings.filter(field => /(una|a)vailable/i.test(field))[0].toLowerCase()
         },
         /**
         * Generate CSS to match an item's availability status.
         * @param  {object} bib       bib object returned from getBib()
+        * @param  {string} type      type of the item, e.g. 'BK' for books
         * @return {object}           CSS to apply using ng-style
         */
-        getAvailabilityStyle: function(bib) {
-          let availability = this.getAvailability(bib)
-          if (availability === 'available') return {
-            color: 'green'
-          }
-          else return {
-            color: 'orange'
+        getAvailabilityStyle: function (bib, type) {
+          let availability = this.getAvailability(bib, type)
+          switch (availability) {
+            case 'available':
+              return { color: 'green' }
+            case 'link':
+              return { color: 'dodgerblue' }
+            default:
+              return { color: 'orange' }
           }
         },
         /**
         * Get the loan type of an item by matching a bib's AVA field to a list.
+        * External resources (e.g. e-books) won't have this value.
         * Requires a lookup table of codes defined in loanCodes.
         * @param  {object} bib       bib object returned from getBib()
         * @return {string}           a description of the loan, e.g. '3-hour loan'
         */
-        getLoanType: function(bib) {
+        getLoanType: function (bib) {
           let holdings = this.getMarcField(bib, 'AVA')
           if (holdings) {
             for (let field of holdings) {
               if (loanCodes.hasOwnProperty(field)) return loanCodes[field]
             }
           }
-          return 'external'
+          return 'external resource'
+        },
+        /**
+         * Get a link to view an item.
+         * External resources will use the MARC 500 (notes) field as a URL.
+         * E-books and physical books will link to a search for the item in Primo.
+         * @param  {object} bib       bib object returned from getBib()
+         * @param  {string} type      type of the item, e.g. 'BK' for books
+         * @param  {string} vid       view name, e.g. LCC
+         * @return {string}           URL to the item
+         */
+        getLink: function (bib, type, vid) {
+          if (type === 'E_CR') return this.getMarcField(bib, '500')[0]
+          return `/primo-explore/search?query=any,contains,${bib.mms_id}&vid=${vid}`
         },
         /**
         * Get a cover image URL for an item using its ISBN or MMSID.
@@ -354,7 +379,7 @@ angular
         * @param  {object} bib       bib object returned from getBib()
         * @return {string}           image URL
         */
-        getCover: function(bib) {
+        getCover: function (bib) {
           let isbn = this.getMarcField(bib, '020')[0]
           if (bib.record.leader[6] != 'a') return URLs.fallback + bib.mms_id
           if (isbn) return URLs.covers + isbn + '/SC.JPG&client=primo'
