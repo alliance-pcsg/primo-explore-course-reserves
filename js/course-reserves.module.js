@@ -8,6 +8,25 @@ angular
           template: `
           <prm-explore-main></prm-explore-main>
           <md-content class="main _md md-primoExplore-theme layout-align-center-start" flex layout-padding>
+              <div flex ng-if="policyInfo" layout="row" layout-xs="column">
+                <md-card ng-repeat="policy in policyInfo" flex>
+                  <md-card-title>
+                    <md-card-title-text>
+                      <span class="md-headline">{{ policy.title }}</span>
+                    </md-card-title-text>
+                  </md-card-title>
+                  <md-card-content>
+                    <p class="md-subhead">{{ policy.body }}</p>
+                  </md-card-content>
+                  <md-card-actions ng-if="policy.links" layout="row">
+                      <div ng-repeat="link in policy.links">
+                          <a ng-href="{{ link.url }}">
+                              <md-button>{{ link.name }}</md-button>
+                          </a>
+                      </div>
+                  </md-card-actions>
+                </md-card>
+              </div>
               <section section="courses" class="md-padding" layout="row" layout-xs="column" layout-align="center" flex>
                   <div ng-repeat="list in courseLists" flex>
                       <md-card>
@@ -38,7 +57,7 @@ angular
                           </md-card-title>
                           <md-card-content ng-if="list.courses.length > 0">
                               <md-list flex>
-                                  <md-list-item class="md-3-line" ng-if="list.departmentFilter === 'all' || course.department === list.departmentFilter" ng-repeat="course in list.courses | orderBy : list.sortType" ui-sref="reserves({cid : course.id, vid: vid})">
+                                  <md-list-item class="md-3-line" ng-if="list.departmentFilter === 'all' || course.department === list.departmentFilter" ng-repeat="course in list.courses | orderBy : list.sortType" ui-sref="reserves({cid : course.id, group: group, vid: vid})">
                                       <div class="md-list-item-text" layout="column">
                                           <ng-template ng-if="list.sortType !== 'name'">
                                               <h3>{{ course.code }}</h3>
@@ -62,10 +81,29 @@ angular
           controller: 'coursesController'
         })
         .state('reserves', {
-          url: '/reserves/:cid?vid',
+          url: '/reserves/:cid?group&vid',
           template: `
           <prm-explore-main></prm-explore-main>
           <md-content class="main _md md-primoExplore-theme" flex layout-padding layout-align="center start">
+              <div flex ng-if="policyInfo" layout="row" layout-xs="column">
+                <md-card ng-repeat="policy in policyInfo" flex>
+                  <md-card-title>
+                    <md-card-title-text>
+                      <span class="md-headline">{{ policy.title }}</span>
+                    </md-card-title-text>
+                  </md-card-title>
+                  <md-card-content>
+                    <p class="md-subhead">{{ policy.body }}</p>
+                  </md-card-content>
+                  <md-card-actions ng-if="policy.links" layout="row">
+                      <div ng-repeat="link in policy.links">
+                          <a ng-href="{{ link.url }}">
+                              <md-button>{{ link.name }}</md-button>
+                          </a>
+                      </div>
+                  </md-card-actions>
+                </md-card>
+              </div>
               <section section="reserves" flex class="md-padding" layout="column" layout-align="center">
                   <md-card ng-if="!course" ng-cloak>
                       <md-card-title>
@@ -118,9 +156,11 @@ angular
         })
     }
   ])
-  .controller('coursesController', ['$scope', '$stateParams', 'coursesService', 'courseLists',
-    function ($scope, $stateParams, coursesService, courseLists) {
+  .controller('coursesController', ['$scope', '$stateParams', 'coursesService', 'courseLists', 'policyInfo',
+    function ($scope, $stateParams, coursesService, courseLists, policyInfo) {
       $scope.vid = $stateParams.vid
+      $scope.group = $stateParams.group
+      $scope.policyInfo = policyInfo.filter(info => info.group === $stateParams.group)
       $scope.courseLists = courseLists.filter(list => list.group === $stateParams.group)
       $scope.courseLists.map(
         list => coursesService.getCourses(list.filter).then(
@@ -139,8 +179,10 @@ angular
       )
     }
   ])
-  .controller('reservesController', ['$scope', '$stateParams', 'reservesService',
-    function ($scope, $stateParams, reservesService, URLs, loanCodes) {
+  .controller('reservesController', ['$scope', '$stateParams', 'reservesService', 'policyInfo',
+    function ($scope, $stateParams, reservesService, policyInfo) {
+      $scope.vid = $stateParams.vid
+      $scope.policyInfo = policyInfo.filter(info => info.group === $stateParams.group)
       reservesService.getCourse($stateParams.cid).then(
         course => {
           $scope.course = course

@@ -5,7 +5,9 @@
 ## Features
 Two new routes are added to the primo-explore application at `/primo-explore/courses` and `/primo-explore/reserves`. The module can be configured with groups of course lists (e.g. for multiple library campuses) that pull currently active courses from Alma using a filter function. Links to a group of course lists can be realized by URLs of the form `/primo-explore/courses/:group` where `group` is an arbitrary identifier.
 
-Course pages display a list of reserve materials with links to view the item in Primo and an indicator of the item's availability. Deep links to an individual course can be realized by URLs of the form `/primo-explore/reserves/:cid` where `cid` is the course id in Alma.
+Course pages display a list of reserve materials with links to view the item in Primo and an indicator of the item's availability. Deep links to an individual course can be realized by URLs of the form `/primo-explore/reserves/:cid?group=some_group` where `cid` is the course id in Alma and `group` is the arbitrary identifier above.
+
+Course and reserve pages can be configured to display information about reserve policies specific to each group. The policy information appears at the top of the screen and can include a set of links to more information.
 
 Both course lists and reserve lists are sortable. Course lists can be filtered by the course academic department code.
 
@@ -13,7 +15,14 @@ This package requires some prior configuration of server-side scripts to interac
 
 ### Screenshots
 ![screenshot](screenshot.png)
+
+---
+
 ![screenshot2](screenshot2.png)
+
+---
+
+![screenshot3](screenshot3.png)
 
 ## Install
 1. Make sure you've installed and configured [primo-explore-devenv](https://github.com/ExLibrisGroup/primo-explore-devenv).
@@ -62,6 +71,17 @@ The `courseLists` constant holds an array of course list objects. The "filter" p
 | `filter`   | filter used to send to server-side code to query alma API for courses. see link above for more info.                                     |
 | `sortType` | optional, one of "name" or "code". if present, will pre-sort course lists by selected sort type.                                         |
 
+#### Policy info
+
+The `policyInfo` constant holds an array of policy information objects. These objects are used to generate the group policy information that can appear above course and reserve lists. All properties are optional strings except `links`, which is an array of link objects.
+
+| name    | usage                                                                                                                                                                   |
+|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `group` | the corresponding group for this policy. the policy will display when lists & courses belonging to this group are displayed.                                            |
+| `title` | the title of the reserve policy.                                                                                                                                        |
+| `body`  | a description of the reserve policy.                                                                                                                                    |
+| `links` | an array of objects that will become buttons at the bottom of the policy display. `name` will be the name of the button, and `url` will be the link the button goes to. |
+
 #### URLs
 
 The `URLs` constant holds an object whose properties are links to web services used to retrieve course and bibliographic information. The values of `course`, `courses`, and `bibs` should all point to server-side scripts similar to those in the `php` folder. All properties are required strings.
@@ -77,8 +97,6 @@ The `URLs` constant holds an object whose properties are links to web services u
 #### Loan Codes
 
 The `loanCodes` constant is an object that maps values from Alma (fulfillment configuration > fulfillment units > fulfillment unit locations tab) to user-readable strings associated with an item's loan type. For example, a fulfillment unit with code `wrs24h` might stand for "24-hour reserves". This information is extracted from the `AVA` field of an item's MARC record. All properties are strings.
-
-
 
 ### Example
 
@@ -106,6 +124,30 @@ app.constant('courseLists', [
       filter: "searchableid~law2",
       sortType: "name"
     }
+])
+
+app.constant('policyInfo', [
+  {
+    group: 'main',
+    title: 'Main Library Reserve Policy',
+    body: `example reserve policy`,
+    links: [{
+      name: 'For Instructors',
+      url: 'http://my.library.edu/course-reserves/instructors'
+    },{
+      name: 'Fair Use',
+      url: 'http://my.library.edu/course-reserves/fairuse'
+    }]
+  },
+  {
+    group: 'law',
+    title: 'Law Library Reserve Policy',
+    body: `example reserve policy`,
+    links: [{
+      name: 'More Info',
+      url: 'http://law.library.edu/course-reserves'
+    }]
+  }
 ])
 
 app.constant('URLs', {
