@@ -32,11 +32,13 @@ function getCourses($filter, $chunkSize = 100, $offset = 0, $courses = array())
     CURLOPT_URL => $url.http_build_query($queryParams)
     ));
     $response = curl_exec($ch);
-  // absurd but necessary...
-  $result = json_decode(json_encode(simplexml_load_string($response)), true);
+    $result = json_decode(json_encode(simplexml_load_string($response)), true); // ex libris isn't good at returning json...
     $total = (int) $result['@attributes']['total_record_count'];
-    foreach ($result['course'] as $course) {
-        array_push($courses, $course);
+    if($result['course'][0] === NULL) { // ex libris doesn't return single items as an array of length 1...
+      array_push($courses, $result['course']);
+    }
+    else {
+      foreach ($result['course'] as $course) array_push($courses, $course);
     }
     if (($total - $offset) > $chunkSize) {
         getCourses($filter, $chunkSize, ($offset + $chunkSize), $courses);
